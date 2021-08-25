@@ -25,9 +25,27 @@ namespace GT.CLI
             {
                 Name = "gt"
             };
+            // config 配置命令
+            var configCommand = new Command("config", "配置文件管理");
+            configCommand.AddCommand(new Command("edit", "编辑config")
+            {
+                Description = "编辑config",
+                Handler = CommandHandler.Create(() =>
+                {
+                    Config.EditConfigFile();
+                })
+            });
+            configCommand.AddCommand(new Command("init", "初始化config")
+            {
+                Description = "初始化config",
+                Handler = CommandHandler.Create(async () =>
+                {
+                    await Config.InitConfigFileAsync();
+                })
+            });
 
             // dto 生成命令
-            var dtoCommand = new Command("dto", "dto模型生成或更新，将生成到Share.Models中");
+            var dtoCommand = new Command("dto", "dto模型生成或更新");
             dtoCommand.AddAlias("dto");
             dtoCommand.AddOption(new Option<string>(new[] { "--entity", "-e" })
             {
@@ -173,13 +191,19 @@ namespace GT.CLI
                    await cmd.GenerateAsync(entity, service, share, web, output);
                });
 
+            configCommand.Handler = CommandHandler.Create<string, string>(
+                (init, edit) =>
+                {
+
+                });
             gtCommand.Add(dtoCommand);
             gtCommand.Add(ngCommand);
             gtCommand.Add(apiCommand);
             gtCommand.Add(viewCommand);
             gtCommand.Add(genCommand);
+            gtCommand.Add(configCommand);
 
-            return gtCommand.InvokeAsync(args).Result;
+            return await gtCommand.InvokeAsync(args);
         }
 
     }

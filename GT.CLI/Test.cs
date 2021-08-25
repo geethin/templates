@@ -15,14 +15,12 @@ namespace GT.CLI
         /// dto 生成测试
         /// </summary>
         /// <param name="entityPath"></param>
-        public void TestDtoGen(string entityPath)
+        public void TestDtoGen(string entityPath, string dtoPath)
         {
-
-            var gen = new DtoGenerate(entityPath);
-
+            var gen = new DtoGenerate(entityPath, dtoPath);
             gen.GenerateDtos();
         }
 
-        
+
     }
 }

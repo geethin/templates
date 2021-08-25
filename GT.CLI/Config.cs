@@ -1,4 +1,5 @@
 ﻿using GT.CLI.Common;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
@@ -6,7 +7,7 @@ namespace GT.CLI
 {
     public static class Config
     {
-        readonly static string ConfigPath = "~/.gtcli-config.json";
+        readonly static string ConfigPath = "./.gtcli-config.json";
 
         public static string ENTITY_NAMESPACE = "Core.Entity";
         public static string SERVICE_NAMESPACE = "Core.Services";
@@ -16,13 +17,15 @@ namespace GT.CLI
         public static string CLIENT_PATH = "../clients/webapp";
         public static string DTO_PATH = "./Share/Models";
 
-
         /// <summary>
         /// 初始化配置文件
         /// </summary>
-        static async Task InitConfigFileAsync()
+        public static async Task InitConfigFileAsync()
         {
-            if (File.Exists(ConfigPath))
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            path = Path.Combine(path, ConfigPath);
+
+            if (File.Exists(path))
             {
                 Console.WriteLine("config file already exist!");
                 return;
@@ -43,24 +46,58 @@ namespace GT.CLI
                 DtoPath = DTO_PATH
             };
 
-            var content = JsonSerializer.Serialize(options);
-            await File.WriteAllTextAsync(ConfigPath, content, Encoding.UTF8);
+            var content = JsonSerializer.Serialize(options, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(path, content, Encoding.UTF8);
         }
 
         /// <summary>
         /// 读取配置文件
         /// </summary>
-        static ConfigOptions ReadConfigFile()
+        public static ConfigOptions ReadConfigFile()
         {
-            if (!File.Exists(ConfigPath))
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            path = Path.Combine(path, ConfigPath);
+
+            if (!File.Exists(path))
             {
-                Console.WriteLine("config file not exist! You can use `gt config init` init config file!");
                 return default;
             }
-            var config = File.ReadAllText(ConfigPath);
+            var config = File.ReadAllText(path);
             var options = JsonSerializer.Deserialize<ConfigOptions>(config);
 
+            WEB_NAMESPACE = options.ApiNamespace;
+            ENTITY_NAMESPACE = options.EntityNamespace;
+            SERVICE_NAMESPACE = options.ServiceNamespace;
+            SHARE_NAMESPACE = options.ShareNamespace;
+            CLIENT_PATH = options.ClientPath;
+            DTO_PATH = options.DtoPath;
+
             return options;
+        }
+
+        public static void EditConfigFile()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            path = Path.Combine(path, ConfigPath);
+            if (!File.Exists(path))
+            {
+                Console.WriteLine("config file not exist!");
+                return;
+            }
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "powershell",
+                    Arguments = $"-c {path}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
         }
     }
 }
