@@ -14,10 +14,10 @@ namespace GT.CLI.Commands
         public string EntityPath { get; set; }
         public string SharePath { get; set; }
 
-        public DtoGenerate(string entityPath)
+        public DtoGenerate(string entityPath, string output)
         {
             EntityPath = entityPath;
-            SharePath = Path.Combine(EntityPath, "..", "..", "Share");
+            SharePath = output;
         }
         /// <summary>
         /// 生成dtos

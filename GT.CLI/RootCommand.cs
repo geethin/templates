@@ -60,9 +60,9 @@ namespace GT.CLI
         /// dto生成或更新
         /// </summary>
         /// <param name="entityPath"></param>
-        public void GenerateDto(string entityPath)
+        public void GenerateDto(string entityPath, string output)
         {
-            var dtoGen = new DtoGenerate(entityPath);
+            var dtoGen = new DtoGenerate(entityPath, output);
             dtoGen.GenerateDtos(true);
             Console.WriteLine("Task done!");
         }
@@ -73,10 +73,10 @@ namespace GT.CLI
         /// <param name="path">实体文件路径</param>
         /// <param name="servicePath">service目录</param>
         /// <param name="webPath">网站目录</param>
-        public void GenerateApi(string path, string servicePath = "", string webPath = "")
+        public void GenerateApi(string path, string servicePath = "", string webPath = "", string dtoPath = "")
         {
             var reposGen = new RepositoryGenerate(path, servicePath);
-            var dtoGen = new DtoGenerate(path);
+            var dtoGen = new DtoGenerate(path, dtoPath);
             dtoGen.GenerateDtos();
             reposGen.GenerateReponsitory();
 
@@ -110,7 +110,7 @@ namespace GT.CLI
         /// <param name="webPath"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public async Task GenerateAsync(string entityFile, string servicePath, string share,string webPath, string output)
+        public async Task GenerateAsync(string entityFile, string servicePath, string share, string webPath, string output)
         {
             Console.WriteLine("生成后台Api代码");
             GenerateApi(entityFile, servicePath, webPath);

@@ -6,7 +6,7 @@ namespace GT.CLI
 {
     internal class Program
     {
-        private static async System.Threading.Tasks.Task<int> Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
             var cmdTet = new RootCommands();
             var test = new Test();
@@ -27,12 +27,16 @@ namespace GT.CLI
             };
 
             // dto 生成命令
-            var dtoCommand = new Command("dto", "dto模型生成或更新，将生成到Shard.Models中");
+            var dtoCommand = new Command("dto", "dto模型生成或更新，将生成到Share.Models中");
             dtoCommand.AddAlias("dto");
             dtoCommand.AddOption(new Option<string>(new[] { "--entity", "-e" })
             {
                 IsRequired = true,
                 Description = "实体模型文件路径"
+            });
+            dtoCommand.AddOption(new Option<string>(new[] { "--output", "-o" })
+            {
+                Description = "dto 输出目录，默认为./Share/Models"
             });
 
 
@@ -112,10 +116,14 @@ namespace GT.CLI
 
             // 执行方法
             var cmd = new RootCommands();
-            dtoCommand.Handler = CommandHandler.Create<string>(
-                (entity) =>
+            dtoCommand.Handler = CommandHandler.Create<string, string>(
+                (entity, output) =>
                 {
-                    cmd.GenerateDto(entity);
+                    if (string.IsNullOrEmpty(output))
+                    {
+                        output = Config.DTO_PATH;
+                    }
+                    cmd.GenerateDto(entity, output);
                 });
 
             ngCommand.Handler = CommandHandler.Create<string, string>(
@@ -139,7 +147,7 @@ namespace GT.CLI
                      {
                          web = "./" + Config.WEB_NAMESPACE;
                      }
-                     cmd.GenerateApi(entity, service, web);
+                     cmd.GenerateApi(entity, service, web, Config.DTO_PATH);
                  });
             viewCommand.Handler = CommandHandler.Create<string, string, string>(
                 (name, share, output) =>
@@ -173,5 +181,6 @@ namespace GT.CLI
 
             return gtCommand.InvokeAsync(args).Result;
         }
+
     }
 }
